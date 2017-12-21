@@ -1,5 +1,5 @@
 flow:
--  select_strucutres.py
+-  select_structures.py
 -  compute_params.py 
 -  spindle.py  -> calinski-harabasz
 *- analyse_erds_spectrum.py
@@ -8,7 +8,7 @@ flow:
 -  group_patients_info.py
 
 
-select_strucutres.py
+select_structures.py
 	- wywołanie:
 		run select_structures.py /home/mzieleniewska/empi/from_hpc/data/smp/patients_99rms_new_reader/occ_results/*spindle_occ.csv -t 12.0
 	oraz

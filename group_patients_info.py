@@ -209,7 +209,16 @@ if __name__ == '__main__':
 
 	plot_swarmplot_for_params(df)
 
+	# unique_emcs = []
+	# for patient in unique(df["patient_id"]):
+	# 	if (len(unique(df.loc[df["patient_id"] == patient]["crs_score"])) == 1) & ("EMCS" in unique(df.loc[df["patient_id"] == patient]["crs_score"])):
+	# 		unique_emcs.append(patient)
+	# emcs_rec_id = df[df["patient_id"].isin(unique_emcs)]["rec_id"].tolist()
 
+	# df = df.drop(df.index[df["rec_id"].isin(['AS_31_01_2017',
+	# 										 'AS_07_04_2017',
+	# 										 'MZ_01_02_2017',
+	# 										 'MZ_25_04_2017'])], inplace=False).reset_index(drop=True)
 
 	# for t in L.get_texts():
 	# 	t.set_text(l_labels[t.get_text()])

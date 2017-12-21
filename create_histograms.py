@@ -9,7 +9,7 @@ import json
 import IPython
 import os
 
-WAVE_TYPES = ['theta']#['spindle', 'SWA']#, 'delta', 'theta', 'alpha', 'beta'] 
+WAVE_TYPES = ['spindle', 'SWA']#, 'delta', 'theta', 'alpha', 'beta'] 
 PROFILE_TYPES = ['counts', 'percent']
 ylabels = {'spindle':'num. of spindles/3min', 'SWA':'%SWA/20sec'}#, 'SWA':'%SWA/20sec', 'Amp/3min', 'Amp/3min', 'Amp/3min', 'Amp/3min'}
 
@@ -18,6 +18,7 @@ pages_db = './pages_db.json'
 channels_db = "./channels_db.json"
 
 fs = 128.0
+
 
 def create_plots(name, directory, annotate=True):
 	data_name = "{}/{}".format(directory, name) + "_{}_hipnogram.csv"
@@ -81,74 +82,6 @@ def create_amplitude_plots(name, directory, annotate=True):
 	axs[i].annotate('\n'.join(text), xy=(0.3, 1), xytext=(0.7, 0.8), xycoords='figure fraction', fontsize=12)
 
 	return fig
-
-
-# def create_combo_plot(name, directory, annotate=True):
-
-# 	data_hipnogram = "{}/{}".format(directory, name) + "_{}_hipnogram.csv"
-# 	data_occ = "{}/{}".format(directory, name) + "_{}_occ_sel.csv"
-
-# 	with open(pages_db) as f:
-# 		key = name.split('.')[0]
-# 		pages_data = json.load(f)
-# 		total_len = int(pages_data[key] * 20) #in sec
-
-# 	if annotate:
-# 		global_dir = "/".join(directory.split("/")[:-1])
-# 		params_csv = os.path.join(global_dir, 'params', name + "_params.csv")
-# 		params = pd.read_csv(params_csv)
-# 		params.drop([u'Unnamed: 0', u'frequency_mse_spindle', u'spectral_entropy', u'theta_rel_power', \
-# 					 u'alpha_rel_power', u'beta2_rel_power', u'beta1_rel_power', u'delta_rel_power'], axis=1, inplace=True)
-
-# 	fig, axs = py.subplots(2 * len(WAVE_TYPES), 1, figsize=(11.69, 8.27))
-# 	text = []
-# 	for c in params.columns:
-# 		text.append(c + ' = %.4f' % (params[c].tolist()[0]))
-
-# 	t = np.linspace(0, total_len, total_len) #in sec * 128.) #in samples
-# 	s_i = 0
-
-# 	for (i, wave_type) in enumerate(WAVE_TYPES):
-# 		hipnogram = pd.read_csv(data_hipnogram.format(wave_type))
-# 		counts = hipnogram['occurences']
-# 		names_occ = hipnogram['time']
-# 		bar_width = names_occ[2]-names_occ[1]
-# 		axs[s_i].bar(names_occ, counts, width=bar_width, color='#c8c6d1', edgecolor='#626166')
-# 		axs[s_i].set_xlim([names_occ.iloc[0], names_occ.iloc[-1]])
-
-# 		if wave_type == "spindle":
-# 			axs[s_i].set_ylim([0, 30])
-# 		else:
-# 			axs[s_i].set_ylim([0, 100])
-# 			axs[s_i].axhline(y=20., color='k', linestyle='-')
-# 			axs[s_i].axhline(y=50., color='k', linestyle='-')
-
-# 		axs[s_i].set_ylabel(ylabels[wave_type])
-# 		if i==(len(WAVE_TYPES)-1): axs[i].set_xlabel('time [hours]')
-# 		s_i += 1
-# 		x = np.zeros(len(t))
-# 		occ = pd.read_csv(data_occ.format(wave_type))
-# 		for index, row in occ.iterrows():
-# 			idx = np.abs(t -row["absolute_position"]).argmin()
-# 			x[idx] += row["amplitude"]
-# 		axs[s_i].plot(t, x)
-# 		axs[s_i].set_xlim([t[0], t[-1]])
-
-# 		if wave_type == "spindle":
-# 			axs[s_i].set_ylim([0, 172])
-# 		else:
-# 			axs[s_i].set_ylim([0, 800])
-
-# 		if wave_type == "spindle":
-# 			ss_count = max(counts)
-# 			ss_amp = max(x)
-# 		else:
-# 			swa_amp = max(counts)
-# 		s_i += 1
-
-# 	axs[0].annotate('\n'.join(text), xy=(0.3, 1), xytext=(0.7, 0.8), xycoords='figure fraction', fontsize=12)
-
-# 	return fig, ss_count, ss_amp, swa_amp
 
 
 def profile_energy_plot(name, directory, additional_parameter='energy', annotate=True):
@@ -266,34 +199,6 @@ def _get_histogram_values_in_sec(data, total_len, bin_width, profile_type='ampli
 				bins[bin_index] += row['modulus']
 
 	return pd.DataFrame({'time': time, 'occurences': bins})
-
-
-# def _get_histogram_values(data, total_len, orig_bin_width, profile_type='amplitude'):
-# 	### profile_type = 'amplitude', 'percent', 'counts'
-
-# 	total_len = total_len / 3600
-# 	# Absolute position is given in hours.
-# 	data['absolute_position'] = data['absolute_position']/3600 #((data['book_id']-1)*20. + data['position'])/3600
-
-# 	if profile_type == 'percent':
-# 		bin_width = 0.33#1./3
-# 	else:
-# 		bin_width = orig_bin_width
-
-# 	number_of_bins = int(total_len*60/bin_width+1)
-# 	bins = np.zeros(number_of_bins)
-# 	time = np.linspace(0, float(number_of_bins*bin_width)/60, len(bins))
-# 	for (index, row) in data.iterrows():
-# 		if profile_type == 'amplitude':
-# 			bins[int(np.floor(row['absolute_position']*60/bin_width))] += row['amplitude'] #row['energy']
-# 		elif profile_type == 'counts':
-# 			bins[int(np.floor(row['absolute_position']*60/bin_width))] += 1
-# 		elif profile_type == 'percent':
-# 			bins[int(np.floor(row['absolute_position']*60/bin_width))] += row['struct_len']
-# 	if profile_type == 'percent':
-# 		bins = (bins/20)*100
-# 		bins[np.where(bins>100)[0]] = 100
-# 	return pd.DataFrame({'time': time, 'occurences': bins})
 
 
 def create_histograms(name, directory, orig_bin_width):

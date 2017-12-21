@@ -18,7 +18,7 @@ import nolds
 from scipy.stats.stats import pearsonr
 
 from create_histograms import _get_histogram_values_in_sec
-from mark_spindles_mmp import fit_gaussian_mixture_model, compute_autocorrelation
+#from mark_spindles_mmp import fit_gaussian_mixture_model, compute_autocorrelation
 
 
 pages_db = "./pages_db.json"
@@ -156,19 +156,30 @@ def compute_params(df, number_of_epochs, structure):
 def get_spectrum_parameters(spectrum_dir, f_name):
 	bands = {'delta': [0.5, 2], 'theta': [2, 8], 'alpha': [8, 12] ,'beta1': [12, 16], 'beta2': [16, 25]}
 	df_temp = pd.DataFrame(columns=['spectral_entropy'])
-	spectrum = np.load(os.path.join(spectrum_dir, f_name + '_ears_full_128_power.npy'))
-	frequencies = np.load(os.path.join(spectrum_dir, f_name + '_ears_full_128_freq.npy'))
+	try:
+		spectrum = np.load(os.path.join(spectrum_dir, f_name + '_ears_full_128_power.npy'))
+		spectrum_fit = np.load(os.path.join(spectrum_dir, 'fitted', f_name + '_ears_full_128_power_fit.npy'))
+		frequencies = np.load(os.path.join(spectrum_dir, f_name + '_ears_full_128_freq.npy'))
+	except IOError:
+		df_temp = pd.DataFrame([11 * [0]], columns=['spectral_entropy', 'delta_rel_power', 'delta_power_fit', 'theta_rel_power', 'theta_power_fit' \
+													'alpha_rel_power', 'alpha_power_fit', 'beta1_rel_power', 'beta1_power_fit', 'beta2_rel_power', \
+													'beta2_power_fit'])
+		return df_temp
 	for b in bands.keys():
 		band = bands[b]
-		p_rel = np.mean(spectrum[np.where((frequencies >= band[0]) & (frequencies < band[1]))[0]]) / np.mean(spectrum)
-		p = np.mean(spectrum[np.where((frequencies >= band[0]) & (frequencies < band[1]))[0]])
+		p_rel = np.sum(spectrum[np.where((frequencies >= band[0]) & (frequencies < band[1]))[0]]) / np.sum(spectrum) * 100
+		p_fit = np.mean(spectrum[np.where((frequencies >= band[0]) & (frequencies < band[1]))[0]])
 		df_temp[b + "_rel_power"] = [p_rel]
-		# df_temp[b + "_power"] = [p]
+		df_temp[b + "_power_fit"] = [p_fit]
 	se = 0
+	se_fit = 0
 	for idf in xrange(len(frequencies)):
 		se += - (np.sum(spectrum[idf] * np.log2(spectrum[idf]))) 
+		se_fit += - (np.sum(spectrum_fit[idf] * np.log2(spectrum_fit[idf]))) 
 	se = se / np.log2(idf+1)
+	se_fit = se_fit / np.log2(idf+1)
 	df_temp["spectral_entropy"] = [se]
+	df_temp["spectral_entropy_fit"] = [se_fit]
 	return df_temp
 
 
@@ -219,53 +230,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-	# group = 'patients'
-	# mp_type = 'smp'
-	# out_dir = 'patients_99rms_new_reader'
-
-	# book_dir = os.path.join('/home/mzieleniewska/empi/from_hpc/data/', mp_type)
-	# spectrum_dir = '/home/mzieleniewska/empi/from_hpc/data/smp/patients_spectra_Cz_05_25Hz/'
-	# clustering_dir = '/home/mzieleniewska/empi/from_hpc/data/smp/'
-
-	# data_dir = os.path.join(book_dir, out_dir)
-
-	# structures = ['spindle','SWA']#['alpha', 'theta', 'beta']
-
-	# file_list = glob.glob(os.path.join(book_dir, group+'_decomposed_books', "*.b"))
-
-	# for id_f in xrange(0, len(file_list)):
-	# 	f = file_list[id_f]
-	# 	if group=='patients':
-	# 		f_parts = os.path.split(f)[1].split('.')[0].split('_')
-	# 		name = '_'.join(f_parts[:4])
-	# 		extension = 'ears_full_128_'+mp_type
-	# 	else:
-	# 		name = os.path.split(f)[1].split('_')[0]+'_ears'
-	# 		extension = mp_type
-	# 	number_of_epochs = get_total_number_of_epochs(name)
-
-	# 	df_params = pd.DataFrame()
-
-	# 	directory = os.path.join(book_dir, out_dir, 'occ_results')
-
-	# 	print name
-
-	# 	for structure in structures:
-	# 		df = pd.read_csv(os.path.join(directory, name+'_'+structure+'_occ_sel.csv'), index_col=0)
-
-	# 		df_temp = compute_params(df, number_of_epochs, structure)
-	# 		if structure=='spindle':
-	# 			clustering_file = os.path.join(clustering_dir, "clustering_parameters_spindle_20uV.csv")
-	# 		elif structure=='SWA':
-	# 			clustering_file = os.path.join(clustering_dir, "clustering_parameters_SWA_75uV.csv")
-
-	# 		df_cluster = get_clustering_parameters(clustering_file, name, structure)
-	# 		# comb = pd.DataFrame([{'ch_dfa_' + structure: float(df_cluster['calinski_harabaz_' + structure]) ** float(df_temp['profile_dfa_' + structure])}])			
-	# 		df_params = pd.concat([df_params, df_temp, df_cluster.reset_index(drop=True)], axis=1)
-	# 	df_spectrum = get_spectrum_parameters(spectrum_dir, name)
-	# 	df_params = pd.concat([df_params, df_spectrum], axis=1)
-
-	# 	if not os.path.exists(os.path.join(book_dir, out_dir, 'params')):
-	# 		os.makedirs(os.path.join(book_dir, out_dir, 'params'))
-	# 	df_params.to_csv(os.path.join(book_dir, out_dir, 'params', name+'_params.csv'))
