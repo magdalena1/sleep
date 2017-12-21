@@ -22,7 +22,7 @@ def main():
 	for path_to_csv in namespace.files:
 		directory = os.path.dirname(path_to_csv)
 		file_name = os.path.basename(path_to_csv)
-		name = "_".join(file_name.split("_")[:5])
+		name = "_".join(file_name.split("_")[:3])
 		df = pd.read_csv(path_to_csv, index_col=0)
 		df = df.drop(df[df.amplitude < float(namespace.threshold)].index, inplace=False).reset_index(drop=True)
 		df.to_csv(os.path.join(directory, name + "_occ_sel.csv"))

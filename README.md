@@ -23,9 +23,10 @@ compute_params.py
 		./compute_params.py /home/mzieleniewska/Coma_sleep_2016/w_projekcie/montage_ears/data/*.b 		  #dla pacjentow
 
 spindle.py
-	- katalog: /home/mzieleniewska/budzik_analiza2 (git branch analyse-sleep-features)
+	- katalog: /home/mzieleniewska/budzik_analiza2 (git branch analyse-sleep-features) lub kopia /home/mzieleniewska/sleep (dawne /home/mzieleniewska/sleep2/eeg_profiles)
 	- przykładowe wywołanie:
 		./spindle.py /home/mzieleniewska/empi/from_hpc/data/smp/patients_99rms_new_reader/occ_results/*<structure>_occ_sel.csv  (SWA lub spindle)
+		./spindle.py /home/mzieleniewska/empi/from_hpc/data/smp/control_99rms_new_reader/occ_results/*<structure>_occ_sel.csv
 	- w pliku nalezy zdefiniować nazwę pliku wyjściowego!
 	- procedura klastrowania (calinski-harabasz)
 

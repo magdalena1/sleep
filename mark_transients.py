@@ -209,7 +209,7 @@ if __name__ == '__main__':
 	
 	ch_id = 7 #Cz 11
 
-	for id_f in [0]:#xrange(0, len(file_list)):
+	for id_f in xrange(0, len(file_list)):
 		f = file_list[id_f]
 		if group=='patients':
 			f_parts = os.path.split(f)[1].split('.')[0].split('_')

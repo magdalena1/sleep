@@ -197,25 +197,23 @@ def main():
 	namespace = parser.parse_args()
 
 	structures = ['spindle','SWA']
-	out_dir = '/home/mzieleniewska/empi/from_hpc/data/smp/patients_99rms_new_reader' #patients lub control_99rms_new_reader
-	spectrum_dir = '/home/mzieleniewska/empi/from_hpc/data/smp/patients_spectra_Cz_05_25Hz/'
+	out_dir = '/home/mzieleniewska/empi/from_hpc/data/smp/control_99rms_new_reader' #patients lub control_99rms_new_reader
+	# spectrum_dir = '/home/mzieleniewska/empi/from_hpc/data/smp/patients_spectra_Cz_05_25Hz/'
 
-	add_spectrum = True  #False for control
+	add_spectrum = False  #False for control
 
 	for path_to_b in namespace.files:
-		full_name = os.path.basename(path_to_b).split('.')[0]
-		# name = full_name  #uncomment for control
-		name = "_".join(full_name.split("_")[:4])
+		name = os.path.basename(path_to_b).split('.')[0]
 		print name
 		number_of_epochs = get_total_number_of_epochs(name)
 		df_params = pd.DataFrame()
 	 	for structure in structures:
-	 	 	df = pd.read_csv(os.path.join(out_dir, 'occ_results', name + '_' + structure + '_occ_sel.csv'), index_col=0)
+	 	 	df = pd.read_csv(os.path.join(out_dir, 'occ_results', name + '_' + structure + '_occ.csv'), index_col=0)
 	 	 	df_temp = compute_params(df, number_of_epochs, structure)
  		 	if structure=='spindle':
-	 	 		clustering_file = os.path.join(out_dir, "clustering_parameters_spindle_20uV.csv")
+	 	 		clustering_file = os.path.join(out_dir, "clustering_parameters_spindle.csv")
 	 	 	elif structure=='SWA':
-	 	 		clustering_file = os.path.join(out_dir, "clustering_parameters_SWA_75uV.csv")
+	 	 		clustering_file = os.path.join(out_dir, "clustering_parameters_SWA.csv")
 	 		df_cluster = get_clustering_parameters(clustering_file, name, structure)
 	 		# comb = pd.DataFrame([{'ch_dfa_' + structure: float(df_cluster['calinski_harabaz_' + structure]) ** float(df_temp['profile_dfa_' + structure])}])			
 	 		df_params = pd.concat([df_params, df_temp, df_cluster.reset_index(drop=True)], axis=1)

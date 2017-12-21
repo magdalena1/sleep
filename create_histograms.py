@@ -88,9 +88,10 @@ def profile_energy_plot(name, directory, additional_parameter='energy', annotate
 
 	#data_occ = "{}/{}".format(directory, name) + "_{}_occ_sel.csv"
 	data_occ = "{}/{}".format(directory, name) + "_{}_occ.csv"
+	hipnogram_out_name = "{}/{}".format(directory, name) + "_{}_hipnogram_energy.csv"
 
 	with open(pages_db) as f:
-		key = name.split('.')[0]
+		key = name #.split('.')[0]
 		pages_data = json.load(f)
 		total_len = int(pages_data[key] * 20) #in sec
 
@@ -137,6 +138,7 @@ def profile_energy_plot(name, directory, additional_parameter='energy', annotate
 		data = pd.read_csv(data_occ.format(wave_type))
 		if additional_parameter == 'energy':
 			histogram_energy = _get_histogram_values_in_sec(data, total_len, 20, 'energy')
+			histogram_energy.to_csv(hipnogram_out_name.format(wave_type))
 			t = histogram_energy['time'] / 3600
 			bar_width = t[2] - t[1]
 			axs[s_i].bar(t, histogram_energy['occurences'], width=bar_width, color='#b2b2b2', edgecolor='#b2b2b2')
@@ -219,25 +221,25 @@ def create_histograms(name, directory, orig_bin_width):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser('Create histrograms for profiles')
 	parser.add_argument('files', nargs='+', metavar='file', help='path to *.csv data files')
-	parser.add_argument('--bin-width', type=int, required=True, help='Bin width given in minutes')
+	# parser.add_argument('--bin-width', type=int, required=True, help='Bin width given in minutes')
 	namespace = parser.parse_args()
 
 	for path_to_csv in namespace.files:
 		directory = os.path.dirname(path_to_csv)
 		file_name = os.path.basename(path_to_csv)
-		name = "_".join(file_name.split("_")[:4])
+		name = "_".join(file_name.split("_")[:2])
 		# create_histograms(name, directory, namespace.bin_width)
 
 		# fig, ss_count, ss_amp, swa_amp = create_combo_plot(name, directory)
-		fig = profile_energy_plot(name, directory, additional_parameter='amplitude', annotate=False)
+		fig = profile_energy_plot(name, directory, additional_parameter='energy', annotate=False)
 		# fig.suptitle(name, fontsize=20)
 
 		# fig = create_plots(name, directory)
 
 		if not os.path.exists(os.path.join(directory, 'profiles')):
 			os.makedirs(os.path.join(directory, 'profiles'))
-		py.savefig(os.path.join(directory, 'profiles', name+'_theta_profil_amplitud.png'))
-		#py.savefig(os.path.join(directory, 'profiles', name+'_profil_amplitud.eps'), format='eps', dpi=1000)
+		# py.savefig(os.path.join(directory, 'profiles', name+'_theta_profil_amplitud.png'))
+		py.savefig(os.path.join(directory, 'profiles', name+'_profil_energii.png'), format='png')#, dpi=1000)
 		py.close(fig)
 
 		# fig = create_amplitude_plots(name, directory, annotate=True)
